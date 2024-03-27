@@ -1,4 +1,7 @@
-# unplugin-parcel-macros
+# unplugin-swc-macros
+
+> [!NOTE]
+> This is a fork of [unplugin-parcel-macros](https://github.com/devongovett/unplugin-parcel-macros), but with the Parcel bundler removed (saving 200M+ disk size)
 
 An [Unplugin](https://unplugin.vercel.app) that lets you use Parcel's [macro](https://parceljs.org/features/macros/) implementation in webpack, Vite, Rollup, esbuild, Next.js, and more.
 
@@ -31,7 +34,7 @@ As you can see, the `regexgen` library has been completely compiled away, and we
 
 ```js
 // webpack.config.js
-const macros = require('unplugin-parcel-macros');
+const macros = require('unplugin-swc-macros');
 
 module.exports = {
   // ...
@@ -45,7 +48,7 @@ module.exports = {
 
 ```js
 // next.config.js
-const macros = require('unplugin-parcel-macros');
+const macros = require('unplugin-swc-macros');
 
 // Create a single instance of the plugin that's shared between server and client builds.
 let plugin = macros.webpack();
@@ -62,7 +65,7 @@ module.exports = {
 
 ```js
 // vite.config.js
-import macros from 'unplugin-parcel-macros';
+import macros from 'unplugin-swc-macros';
 
 export default {
   plugins: [
@@ -75,7 +78,7 @@ export default {
 
 ```js
 // rollup.config.js
-import macros from 'unplugin-parcel-macros';
+import macros from 'unplugin-swc-macros';
 
 export default {
   plugins: [
@@ -88,7 +91,7 @@ export default {
 
 ```js
 import {build} from 'esbuild';
-import macros from 'unplugin-parcel-macros';
+import macros from 'unplugin-swc-macros';
 
 build({
   plugins: [

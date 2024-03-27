@@ -1,5 +1,5 @@
 {
-  "name": "unplugin-parcel-macros",
+  "name": "unplugin-swc-macros",
   "version": "0.0.3",
   "main": "unplugin-macros.js",
   "types": "unplugin-macros.d.ts",
@@ -23,22 +23,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/devongovett/unplugin-parcel-macros"
+    "url": "ambar/unplugin-swc-macros"
   },
   "scripts": {
-    "artifacts": "napi artifacts",
-    "build": "napi build --platform --release",
-    "build:debug": "napi build --platform",
-    "prepublishOnly": "napi prepublish -t npm",
-    "universal": "napi universal",
-    "version": "napi version"
   },
   "packageManager": "yarn@4.1.0",
   "dependencies": {
-    "@parcel/core": "^2.12.0",
-    "@parcel/fs": "^2.12.0",
-    "@parcel/package-manager": "^2.12.0",
-    "@parcel/source-map": "^2.1.1",
     "unplugin": "^1.9.0"
   }
 }
