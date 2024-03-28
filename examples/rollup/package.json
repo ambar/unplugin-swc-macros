@@ -1,0 +1,23 @@
+{
+  "name": "rollup",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "source": "src/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "rollup -c -w",
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "rollup": "^4.13.1",
+    "unplugin-parcel-macros": "link:../../"
+  }
+}
