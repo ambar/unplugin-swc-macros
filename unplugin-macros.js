@@ -1,6 +1,8 @@
 const {createUnplugin} = require('unplugin');
 const {Type, transform} = require('./index');
 const path = require('path');
+const crypto = require('crypto');
+const SourceMap = require('@parcel/source-map').default;
 const {requireFromFile, resolveEntry} = require('./require-from');
 
 const types = {
@@ -9,6 +11,9 @@ const types = {
   '.ts': Type.TS,
   '.tsx': Type.TSX,
 };
+
+let assets = new Map();
+let assetsByFile = new Map();
 
 /** @type {import('unplugin').UnpluginInstance} */
 module.exports = createUnplugin(() => {
@@ -22,6 +27,16 @@ module.exports = createUnplugin(() => {
       if (!/with[\s\n]*\{\s*type:[\s\n]*['"]macro['"][\s\n]*\}/.test(code)) {
         return;
       }
+
+      // Remove old assets.
+      let currentAssets = assetsByFile.get(filePath);
+      if (currentAssets) {
+        for (let asset of currentAssets) {
+          assets.delete(asset);
+        }
+      }
+      currentAssets = [];
+      assetsByFile.set(filePath, currentAssets);
 
       let imports = [];
       let res = await transform(types[path.extname(filePath)], code, async (_err, src, exportName, args, loc) => {
@@ -43,15 +58,59 @@ module.exports = createUnplugin(() => {
 
         try {
           if (typeof mod[exportName] === 'function') {
+            let macroAssets = [];
+            let addWatchFile = async (id) => {
+              this.addWatchFile(await resolveEntry(id, path.dirname(modPath)));
+            };
             let result = mod[exportName].apply(
               {
-                addWatchFile: async (filePath) => {
-                  const dir = path.dirname(modPath);
-                  this.addWatchFile(await resolveEntry(filePath, dir));
+                addAsset(asset) {
+                  macroAssets.push(asset);
                 },
+                invalidateOnFileChange: addWatchFile,
+                // Extra API, not part of the upstream unplugin API
+                addWatchFile: addWatchFile,
+                // Cannot use `this.emitFile`, no reference id returned: https://github.com/unjs/unplugin/issues/256
+                // - only available during build phase in vite
+                // - available in rollup
+                // - not available in webpack
               },
               args
             );
+
+            for (let asset of macroAssets) {
+              let hash = crypto.createHash('sha256');
+              hash.update(asset.content);
+              let id = `${filePath}.macro-${hash.digest('hex')}.${asset.type}`;
+              assets.set(id, asset);
+              currentAssets.push(id);
+              imports.push(`import "${id}";`);
+
+              // Generate a source map that maps each line of the asset to the original macro call.
+              let map = new SourceMap(process.cwd());
+              let mappings = [];
+              let line = 1;
+              for (let i = 0; i <= asset.content.length; i++) {
+                if (i === asset.content.length || asset.content[i] === '\n') {
+                  mappings.push({
+                    generated: {
+                      line,
+                      column: 0,
+                    },
+                    source: filePath,
+                    original: {
+                      line: loc.line,
+                      column: loc.col,
+                    },
+                  });
+                  line++;
+                }
+              }
+
+              map.addIndexedMappings(mappings);
+              map.setSourceContent(filePath, code);
+              asset.content += `\n/*# sourceMappingURL=${await map.stringify({format: 'inline'})} */`;
+            }
 
             return result;
           } else {
@@ -76,6 +135,17 @@ module.exports = createUnplugin(() => {
 
       res.code += '\n' + imports.join('\n');
       return res;
+    },
+    resolveId(id) {
+      if (assets.has(id)) {
+        return id;
+      }
+    },
+    loadInclude(id) {
+      return assets.has(id);
+    },
+    load(id) {
+      return assets.get(id).content;
     },
   };
 });
