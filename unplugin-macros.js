@@ -3,7 +3,7 @@ const {Type, transform} = require('./index');
 const path = require('path');
 const crypto = require('crypto');
 const SourceMap = require('@parcel/source-map').default;
-const {requireFromFile, resolveEntry} = require('./require-from');
+const {requireFrom, resolveEntry} = require('./require-from');
 
 const types = {
   '.js': Type.JS,
@@ -43,7 +43,7 @@ module.exports = createUnplugin(() => {
         let mod, modPath;
         try {
           modPath = await resolveEntry(src, path.dirname(filePath));
-          mod = await requireFromFile(modPath);
+          mod = await requireFrom(modPath);
           if (!Object.hasOwnProperty.call(mod, exportName)) {
             throw new Error(`"${src}" does not export "${exportName}".`);
           }

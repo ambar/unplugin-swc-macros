@@ -37,6 +37,9 @@
     "require-from-string": "^2.0.2",
     "unplugin": "^1.9.0"
   },
+  "devDependencies": {
+    "vitest": "^1.4.0"
+  },
   "optionalDependencies": {
     "unplugin-parcel-macros-darwin-arm64": "0.0.3",
     "unplugin-parcel-macros-darwin-x64": "0.0.3",
