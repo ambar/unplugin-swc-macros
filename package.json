@@ -1,6 +1,6 @@
 {
   "name": "unplugin-swc-macros",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "unplugin-macros.js",
   "types": "unplugin-macros.d.ts",
   "napi": {
